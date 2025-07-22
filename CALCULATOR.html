@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cal'cool'ator</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      margin: 0;
+      padding-top: 3vh;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      font-family: "Poppins", sans-serif;
+      color: #fff;
+    }
+    .calculator {
+      width: min(95vw, 450px);
+      padding: 20px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(15px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .logo img {
+      width: 60px;
+      height: 60px;
+    }
+    #display {
+      width: 100%;
+      height: 60px;
+      font-size: 28px;
+      text-align: right;
+      border: none;
+      border-radius: 12px;
+      margin-bottom: 6px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+    }
+    #sub-display {
+      width: 100%;
+      min-height: 20px;
+      margin-bottom: 16px;
+      font-size: 12px;
+      text-align: right;
+      opacity: 0.75;
+    }
+    .mode-toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    .mode-toggle button {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    .mode-toggle button.active {
+      background: linear-gradient(135deg, #ff9800, #ff6a00);
+      color: #222;
+      font-weight: bold;
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+    }
+    .btn {
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      cursor: pointer;
+      transition: 0.15s;
+      user-select: none;
+    }
+    .btn:hover { background: rgba(255, 255, 255, 0.2); }
+    .btn:active { background: rgba(255, 255, 255, 0.3); }
+    .btn.equal {
+      grid-column: span 2;
+      background: linear-gradient(135deg, #ff9800, #ff6a00);
+      color: #222;
+      font-weight: bold;
+    }
+    .btn.zero { grid-column: span 2; }
+    .btn.stats, .btn.adv { font-size: 12px; }
+    .history-box {
+      margin-top: 10px;
+      max-height: 120px;
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="logo">
+      <img src="calculatorlogo.png" alt="Calculator Logo">
+      <h2>Cal'cool'ator</h2>
+    </div>
+    <input type="text" id="display" readonly />
+    <div id="sub-display"></div>
+
+    <div class="mode-toggle">
+      <span>Angle:</span>
+      <button id="degBtn" class="active" onclick="setAngleMode('DEG')">DEG</button>
+      <button id="radBtn" onclick="setAngleMode('RAD')">RAD</button>
+      <button onclick="toggleHistory()">View History</button>
+    </div>
+
+    <div class="buttons">
+      <!-- Row 1 -->
+      <button class="btn" onclick="clearDisplay()">C</button>
+      <button class="btn" onclick="backspace()">←</button>
+      <button class="btn" onclick="appendValue('(')">(</button>
+      <button class="btn" onclick="appendValue(')')">)</button>
+      <button class="btn" onclick="appendValue('/')">÷</button>
+      <button class="btn" onclick="appendValue('*')">×</button>
+      
+      <!-- Row 2 -->
+      <button class="btn" onclick="appendValue('7')">7</button>
+      <button class="btn" onclick="appendValue('8')">8</button>
+      <button class="btn" onclick="appendValue('9')">9</button>
+      <button class="btn" onclick="appendValue('-')">−</button>
+      <button class="btn" onclick="appendValue('+')">+</button>
+      <button class="btn" onclick="percentOp()">%</button>
+      
+      <!-- Row 3 -->
+      <button class="btn" onclick="appendValue('4')">4</button>
+      <button class="btn" onclick="appendValue('5')">5</button>
+      <button class="btn" onclick="appendValue('6')">6</button>
+      <button class="btn" onclick="appendValue('.')">.</button>
+      <button class="btn equal" onclick="calculate()">=</button>
+      
+      <!-- Row 4 -->
+      <button class="btn" onclick="appendValue('1')">1</button>
+      <button class="btn" onclick="appendValue('2')">2</button>
+      <button class="btn" onclick="appendValue('3')">3</button>
+      <button class="btn zero" onclick="appendValue('0')">0</button>
+      <button class="btn stats" onclick="statsMenu()">Stats</button>
+      
+      <!-- Row 5: Scientific -->
+      <button class="btn" onclick="applyUnary('sin')">sin</button>
+      <button class="btn" onclick="applyUnary('cos')">cos</button>
+      <button class="btn" onclick="applyUnary('tan')">tan</button>
+      <button class="btn" onclick="applyUnary('log10')">log</button>
+      <button class="btn" onclick="applyUnary('ln')">ln</button>
+      <button class="btn" onclick="expOp()">eˣ</button>
+      
+      <!-- Row 6 -->
+      <button class="btn" onclick="pow2()">x²</button>
+      <button class="btn" onclick="pow3()">x³</button>
+      <button class="btn" onclick="powY()">xʸ</button>
+      <button class="btn" onclick="sqrtOp()">√x</button>
+      <button class="btn" onclick="cbrtOp()">∛x</button>
+      <button class="btn" onclick="factorialOp()">x!</button>
+      
+      <!-- Row 7 -->
+      <button class="btn" onclick="insertConst(Math.PI)">π</button>
+      <button class="btn" onclick="insertConst(Math.E)">e</button>
+      <button class="btn adv" onclick="matrixMenu()">Matrix</button>
+      <button class="btn adv" onclick="complexMenu()">Complex</button>
+      <button class="btn adv" onclick="geometryMenu()">Geometry</button>
+      <button class="btn adv" onclick="casMenu()">CAS</button>
+    </div>
+    <div class="history-box" id="historyBox" style="display:none;"></div>
+  </div>
+
+  <script>
+    const display = document.getElementById('display');
+    const subDisplay = document.getElementById('sub-display');
+    const historyBox = document.getElementById('historyBox');
+    let angleMode = 'DEG';
+    let history = [];
+
+    function setAngleMode(m) {
+      angleMode = m;
+      document.getElementById('degBtn').classList.toggle('active', m === 'DEG');
+      document.getElementById('radBtn').classList.toggle('active', m === 'RAD');
+    }
+    function appendValue(v) { display.value += v; }
+    function clearDisplay() { display.value = ''; }
+    function backspace() { display.value = display.value.slice(0, -1); }
+    function insertConst(c) { display.value += c === Math.PI ? 'π' : 'e'; }
+    function toRad(x) { return angleMode === 'DEG' ? x * Math.PI / 180 : x; }
+    function fromRad(x) { return angleMode === 'DEG' ? x * 180 / Math.PI : x; }
+    function getDisplayNumber() {
+      return Number(display.value.replace(/π/g, Math.PI).replace(/e/g, Math.E));
+    }
+    function formatNumber(n) { return Number.isFinite(n) ? +n.toPrecision(12) : 'Error'; }
+
+    function calculate() {
+      try {
+        let expr = display.value.replace(/π/g, Math.PI).replace(/e/g, Math.E);
+        let res = Function(`return (${expr})`)();
+        display.value = formatNumber(res);
+        history.push(expr + " = " + display.value);
+        updateHistory();
+      } catch { display.value = 'Error'; }
+    }
+    function applyUnary(type) {
+      let x = getDisplayNumber();
+      let r = 0;
+      if (type === 'sin') r = Math.sin(toRad(x));
+      if (type === 'cos') r = Math.cos(toRad(x));
+      if (type === 'tan') r = Math.tan(toRad(x));
+      if (type === 'log10') r = Math.log10(x);
+      if (type === 'ln') r = Math.log(x);
+      display.value = formatNumber(r);
+      history.push(`${type}(${x}) = ${display.value}`);
+      updateHistory();
+    }
+    function expOp() { let x = getDisplayNumber(); display.value = formatNumber(Math.exp(x)); }
+    function pow2() { let x = getDisplayNumber(); display.value = formatNumber(x**2); }
+    function pow3() { let x = getDisplayNumber(); display.value = formatNumber(x**3); }
+    function powY() {
+      let base = getDisplayNumber();
+      let exp = +prompt("Enter exponent:");
+      display.value = formatNumber(base**exp);
+    }
+    function sqrtOp() { let x = getDisplayNumber(); display.value = formatNumber(Math.sqrt(x)); }
+    function cbrtOp() { let x = getDisplayNumber(); display.value = formatNumber(Math.cbrt(x)); }
+    function factorialOp() {
+      let n = getDisplayNumber(); let r=1;
+      if(n<0||!Number.isInteger(n)||n>170) {display.value='Error';return;}
+      for(let i=1;i<=n;i++)r*=i;
+      display.value = formatNumber(r);
+    }
+    function percentOp() { let x = getDisplayNumber(); display.value = formatNumber(x/100); }
+
+    function statsMenu() {
+      let nums = display.value.split(',').map(Number);
+      if (!nums.length) return alert("Enter numbers separated by commas.");
+      let op = prompt("Enter stat operation: sum, mean, median, mode");
+      let r;
+      switch(op) {
+        case 'sum': r = nums.reduce((a,b)=>a+b,0); break;
+        case 'mean': r = nums.reduce((a,b)=>a+b,0)/nums.length; break;
+        case 'median': nums.sort((a,b)=>a-b); let mid=Math.floor(nums.length/2); r=nums.length%2?nums[mid]:(nums[mid-1]+nums[mid])/2; break;
+        case 'mode': let freq={}; nums.forEach(v=>freq[v]=(freq[v]||0)+1); r = Object.keys(freq).reduce((a,b)=>freq[a]>=freq[b]?a:b); break;
+      }
+      display.value = formatNumber(+r);
+      history.push(`Stats(${op}): ${r}`);
+      updateHistory();
+    }
+
+    function toggleHistory() {
+      historyBox.style.display = historyBox.style.display === 'none' ? 'block' : 'none';
+      updateHistory();
+    }
+    function updateHistory() { historyBox.innerHTML = history.join('<br>'); }
+
+    function matrixMenu() { alert('Matrix operations here'); }
+    function complexMenu() { alert('Complex number operations here'); }
+    function geometryMenu() { alert('Geometry calculations here'); }
+    function casMenu() { alert('CAS operations here'); }
+  </script>
+</body>
+</html>
